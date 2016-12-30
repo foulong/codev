@@ -115,8 +115,112 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
 
    } else if ('updateUserSettings' === $action) {
       
+      $statusMsg = 'TODO';
+      $data = array(
+        'statusMsg' => $statusMsg,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
       echo $jsonData;
       
+   } else if ('AckPost' === $action) {
+      $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
+      $statusMsg = 'SUCCESS';
+      try {
+         $blogpost = new BlogPost($blogpostId);
+
+         // TODO check user rights
+
+         // do the job
+         $blogpost->setActivity($sessionUserid, BlogPost::activity_ack, true, time());
+
+
+      } catch (Exception $ex) {
+         $statusMsg = "ERROR: ".$ex->getMessage();
+      }
+
+      $data = array(
+        'statusMsg' => $statusMsg,
+        'blogpostId' => $blogpostId,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
+   } else if ('DeletePost' === $action) {
+      $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
+      $statusMsg = 'SUCCESS';
+      try {
+         $blogpost = new BlogPost($blogpostId);
+
+         // TODO check user rights
+
+         // do the job
+         $blogpost->delete();
+
+      } catch (Exception $ex) {
+         $statusMsg = "ERROR: ".$ex->getMessage();
+      }
+
+      $data = array(
+        'statusMsg' => $statusMsg,
+        'blogpostId' => $blogpostId,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
+   } else if ('HidePost' === $action) {
+      $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
+      $statusMsg = 'SUCCESS';
+      try {
+         $blogpost = new BlogPost($blogpostId);
+
+         // TODO check user rights
+
+         // do the job
+         $blogpost->setActivity($sessionUserid, BlogPost::activity_hide, true, time());
+
+      } catch (Exception $ex) {
+         $statusMsg = "ERROR: ".$ex->getMessage();
+      }
+
+      $data = array(
+        'statusMsg' => $statusMsg,
+        'blogpostId' => $blogpostId,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
+   } else if ('UnhidePost' === $action) {
+      $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
+      $statusMsg = 'SUCCESS';
+      try {
+         $blogpost = new BlogPost($blogpostId);
+
+         // TODO check user rights
+
+         // do the job
+         $blogpost->setActivity($sessionUserid, BlogPost::activity_hide, false, time());
+
+      } catch (Exception $ex) {
+         $statusMsg = "ERROR: ".$ex->getMessage();
+      }
+
+      $data = array(
+        'statusMsg' => $statusMsg,
+        'blogpostId' => $blogpostId,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
    } else {
       Tools::sendNotFoundAccess();
    }

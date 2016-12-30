@@ -25,6 +25,9 @@ class BlogPost implements Comparable {
    const severity_normal = 2;
    const severity_high = 3;
 
+   const activity_ack  = 0;
+   const activity_hide = 1;
+
    /**
     * @var Logger The logger
     */
@@ -65,6 +68,13 @@ class BlogPost implements Comparable {
             echo "<span style='color:red'>ERROR: Query FAILED</span>";
             exit;
          }
+         if (0 == SqlWrapper::getInstance()->sql_num_rows($result)) {
+            $e = new Exception("BlogPost $this->id does not exist");
+            self::$logger->error("EXCEPTION BlogPost constructor: " . $e->getMessage());
+            self::$logger->error("EXCEPTION stack-trace:\n" . $e->getTraceAsString());
+            throw $e;
+         }
+
          $row = SqlWrapper::getInstance()->sql_fetch_object($result);
       }
 
@@ -98,6 +108,24 @@ class BlogPost implements Comparable {
             return T_('High');
          default:
             #return T_("unknown $severity");
+            return NULL;
+      }
+   }
+
+   /**
+    * Literal name for the given activity_id
+    *
+    * @param int $activity
+    * @return string actionName or NULL if unknown
+    */
+   public static function getActivityName($activity) {
+      switch ($activity) {
+         case self::activity_ack:
+            return T_('Acknowledged');
+         case self::activity_hide:
+            return T_('Hidden');
+         default:
+            #return T_('unknown');
             return NULL;
       }
    }
@@ -150,69 +178,62 @@ class BlogPost implements Comparable {
     * Delete a post and all it's activities.
     *
     * Note: Only administrators & the owner of the post are allowed to delete.
-    *
-    * @param int $blogPost_id
     */
-   public static function delete($blogPost_id) {
+   public function delete() {
       // TODO check admin/ user access rights
 
-      $query = "DELETE FROM `codev_blog_activity_table` WHERE blog_id = ".$blogPost_id.";";
+      $query = "DELETE FROM `codev_blog_activity_table` WHERE blog_id = ".$this->id.";";
       $result = SqlWrapper::getInstance()->sql_query($query);
       if (!$result) {
          echo "<span style='color:red'>ERROR: Query FAILED</span>";
          exit;
       }
 
-      $query = "DELETE FROM `codev_blog_table` WHERE id = ".$blogPost_id.";";
-      $result = SqlWrapper::getInstance()->sql_query($query);
-      if (!$result) {
+      $query2 = "DELETE FROM `codev_blog_table` WHERE id = ".$this->id.";";
+      $result2 = SqlWrapper::getInstance()->sql_query($query2);
+      if (!$result2) {
          echo "<span style='color:red'>ERROR: Query FAILED</span>";
          exit;
       }
    }
 
    /**
-    * @param int $blogPost_id
+    * Creates an activity for a user
+    *
     * @param int $user_id
-    * @param string $action
+    * @param int $activity_id
+    * @param boolean $value  true to add, false to remove
     * @param int $date
     *
-    * @return int activity id or '0' if failed
+    * @throws exception if failed
     */
-   public static function addActivity($blogPost_id, $user_id, $action, $date) {
-      // check if $blogPost_id exists (foreign keys do not exist in MyISAM)
-      $fPostId = SqlWrapper::sql_real_escape_string($blogPost_id);
+   public function setActivity($user_id, $activity_id, $value, $date) {
 
-      $query = "SELECT id FROM `codev_blog_table` where id = ".$fPostId.";";
-      $result = SqlWrapper::getInstance()->sql_query($query);
-      if (!$result) {
-         echo "<span style='color:red'>ERROR: Query FAILED</span>";
-         exit;
+      // TODO: check if activity_id is valid ?
+      
+      if (true === $value) {
+         // set this action.
+         // TODO if already set, do nothing
+         $query = "INSERT INTO `codev_blog_activity_table` (`blog_id`, `user_id`, `action`, `date`) ".
+                  "VALUES ('$this->id','$user_id','$activity_id','$date')";
+      } else {
+         // unset the action
+         $query = "DELETE FROM `codev_blog_activity_table` WHERE user_id = $user_id AND action = $activity_id";
       }
-      if (0 == SqlWrapper::getInstance()->sql_num_rows($result)) {
-         self::$logger->error("addActivity: blogPost '$fPostId' does not exist !");
-         return 0;
-      }
-
-      // add activity
-      $fUserId = SqlWrapper::sql_real_escape_string($user_id);
-      $fAction = SqlWrapper::sql_real_escape_string($action);
-      $fDate   = SqlWrapper::sql_real_escape_string($date);
-      $query = "INSERT INTO `codev_blog_activity_table` ".
-               "(`blog_id`, `user_id`, `action`, `date`) ".
-               "VALUES ('$fPostId','$fUserId','$fAction','$fDate')";
 
       $result = SqlWrapper::getInstance()->sql_query($query);
       if (!$result) {
-         echo "<span style='color:red'>ERROR: Query FAILED</span>";
-         return 0;
+         #echo "<span style='color:red'>ERROR: Query FAILED</span>";
+         $e = new Exception("ERROR: Query FAILED");
+         self::$logger->error("EXCEPTION BlogPost addActivity: " . $e->getMessage());
+         self::$logger->error("EXCEPTION stack-trace:\n" . $e->getTraceAsString());
+         throw $e;
       }
-
       return SqlWrapper::getInstance()->sql_insert_id();
    }
 
    /**
-    * @return BlogActivity[]
+    * @return array activities[]
     */
    public function getActivityList() {
       if (NULL == $this->activityList) {
@@ -225,7 +246,13 @@ class BlogPost implements Comparable {
 
          $this->activityList = array();
          while($row = SqlWrapper::getInstance()->sql_fetch_object($result)) {
-            $this->activityList[$row->id] = new BlogActivity($row->id, $row->blog_id, $row->user_id, $row->action, $row->date);
+            $this->activityList[$row->id] = array(
+                'id' => $row->id,
+                'blogpostId' => $row->blog_id,
+                'userId' => $row->user_id,
+                'activityId' => $row->action,
+                'activityName' => $this->getActivityName($row->action),
+                'timestamp' => $row->date);
          }
       }
       return $this->activityList;
