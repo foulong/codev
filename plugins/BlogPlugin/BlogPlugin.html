@@ -140,6 +140,26 @@
    // or when a new widget is added to the dashboard.
    function blogPluginJsInit() {
 
+
+      jQuery(".blogPlugin_btAckPost").click(function(e) {
+         var postId = jQuery(this).attr("data-bpostId");
+         console.log("blogPlugin_btAckPost",postId);
+      });
+      jQuery(".blogPlugin_btHidePost").click(function(e) {
+         var postId = jQuery(this).attr("data-bpostId");
+         console.log("blogPlugin_btHidePost",postId);
+
+      });
+      jQuery(".blogPlugin_btUnhidePost").click(function(e) {
+         var postId = jQuery(this).attr("data-bpostId");
+         console.log("blogPlugin_btUnhidePost",postId);
+
+      });
+      jQuery(".blogPlugin_btDeletePost").click(function(e) {
+         var postId = jQuery(this).attr("data-bpostId");
+         console.log("blogPlugin_btDeletePost",postId);
+      });
+
       jQuery(".blogPluginHelpDialog_link").click(function(e) {
          e.preventDefault();
          jQuery(".blogPluginHelpDialog").dialog("open");

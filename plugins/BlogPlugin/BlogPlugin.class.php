@@ -160,13 +160,20 @@ class BlogPlugin extends IndicatorPluginAbstract {
          }
 
          $item['activity'] = 'activities...'; // TODO
-         $item['buttons'] = "<input type='button' value='".T_('Ack')."' onclick='javascript: ackPost(".$bpost->id.")' />";
 
-         // TODO not if i'm the owner
-         $item['buttons'] .= "<input type='button' value='".T_('Hide')."' onclick='javascript: hidePost(".$bpost->id.")' />";
+         // ----------
+         $item['buttons'] .="<img class='blogPlugin_btAckPost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_markAsRead.png' title='".T_('Mark as read')."'>";
 
-         // TODO only if i'm the owner
-         $item['buttons'] .= "<input type='button' value='".T_('Delete')."' onclick='javascript: deletePost(".$bpost->id.")' />";
+         if ($this->sessionUserId === $bpost->src_user_id) {
+            // only if i'm the owner
+            $item['buttons'] .="<img class='blogPlugin_btDeletePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";
+         } else {
+            // not if i'm the owner
+            $item['buttons'] .="<img class='blogPlugin_btHidePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_hide.png' title='".T_('Hide')."'>";
+         }
+
+         // TODO only if hidden
+         $item['buttons'] .="<img class='blogPlugin_btUnhidePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_unhide.png' title='".T_('Show')."'>";
 
          $item['isHidden'] = '0';
 
