@@ -1,0 +1,249 @@
+<div class="BlogPlugin">
+<div class="pluginInitFunction"  style="display: none;">blogPluginJsInit</div>
+<div class="pluginDestroyFunction"  style="display: none;">blogPluginJsDestroy</div>
+{if isset($blogPlugin_blogPosts)}
+<div>
+   <div>
+      <div class="float" style="width:95%;height:350px;overflow-x:hidden;overflow-y:auto;">
+      {foreach from=$blogPlugin_blogPosts key=id item=i}
+         {include file="`$blogPlugin_ajaxFile`"}
+            <br>
+      {/foreach}
+      </div>
+   </div>
+   <div class="floatr" style="margin-top:1em; width: 16px">
+      <a class="blogPluginHelpDialog_link float" href="">
+         <img title="Help" src="images/help_icon.gif"/>
+      </a>
+      <a class="blogPluginAddPost_link float" href="">
+         <img title="{t}Add new post{/t}" src="images/b_add.png"/>
+      </a>
+      <a class="blogPluginConfig_link float" href="">
+         <img title="{t}Options{/t}" src="images/b_config.png"/>
+      </a>
+   </div>
+</div>
+
+<div class="blogPluginAddPostDialog ui-helper-hidden" title="{t}Add new blog post{/t}">
+   <table style="width:100%">
+      <tr>
+         <td style="width:50px;">
+            <select class='blogPlugin_add_category' title="{t}Category{/t}" >
+               {foreach from=$blogPlugin_categoryList key=id item=name}
+                  <option value='{$id}'>{$name}</option>
+               {/foreach}
+            </select>
+         </td>
+         <td  >
+            <input type='text' class='blogPlugin_add_summary' placeholder="{t}Title{/t}" style='width:100%; font-family: sans-serif'>
+         </td>
+         <td>
+            {t}Severity{/t} :
+            <select class='blogPlugin_add_severity'>
+               {foreach from=$blogPlugin_severityList key=id item=name}
+                  <option value='{$id}'>{$name}</option>
+               {/foreach}
+            </select>
+         </td>
+      </tr>
+      <tr>
+         <td colspan="2" rowspan="3" style="width:800px">
+            <textarea class='blogPlugin_add_content'  placeholder="{t}Description{/t}" style="resize: none; font-family: sans-serif; border: none; width: 100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;" rows="6"></textarea>
+         </td>
+         <td>
+            {t}Expire{/t} :
+            <input type="text" class="blogPlugin_add_expiredatepicker datepicker" name="blogPlugin_date_expire" placeholder="{t}Exp. date{/t}"  autocomplete="off" maxlength="10" size="10" title="{t}Expiration Date{/t}" />
+         </td>
+      </tr>
+      <tr>
+         <td>
+            Destination :
+            <div>
+               <input class="blogPlugin_add_dest" type="radio" name="blogPlugin_grp_dest" value="dest_team" checked>{t}Team{/t} ({$teamName})
+               <br>
+               <input class="blogPlugin_add_dest" type="radio" name="blogPlugin_grp_dest" value="dest_user">{t}User{/t}:
+               <br>
+               <select class='blogPlugin_add_user_dest select2' style="width: 200px;">
+                  <option value='0'>-- {t}All{/t} --</option>
+                  {foreach from=$blogPlugin_userCandidateList key=id item=name}
+                     <option value='{$id}'>{$name}</option>
+                  {/foreach}
+               </select>
+            </div>
+         </td>
+      </tr>
+   </table>
+</div>
+
+<div class="blogPluginOptionDialog ui-helper-hidden" title="{t}Blog Options{/t}">
+   {t}Post filters:{/t}<br>
+   <table class="invisible">
+      <tr>
+         <td>{t}Recipient{/t}</td>
+         <td>:</td>
+         <td>
+            <select class='blogPlugin_opt_recipient' name='blogPlugin_opt_recipient'>
+               <option value='all'>{t}All{/t}</option>
+               <option value='current_team'>{t}Current team{/t}</option>
+               <option value='only_me'>{t}Only me{/t}</option>
+            </select>
+         </td>
+      </tr>
+      <tr>
+         <td>{t}Category{/t}</td>
+         <td>:</td>
+         <td>
+            <select class='blogPlugin_opt_category' name='blogPlugin_opt_category'>
+               <option value='0'>{t}All{/t}</option>
+               {foreach from=$blogPlugin_categoryList key=id item=name}
+                  <option value='{$id}'>{$name}</option>
+               {/foreach}
+            </select>
+         </td>
+      </tr>
+      <tr>
+         <td>{t}Severity{/t}</td>
+         <td>:</td>
+         <td>
+            <select class='blogPlugin_opt_severity' name='blogPlugin_opt_severity'>
+               <option value='0'>{t}All{/t}</option>
+               {foreach from=$blogPlugin_severityList key=id item=name}
+                  <option value='{$id}'>{$name}</option>
+               {/foreach}
+            </select>
+         </td>
+      </tr>
+   </table>
+</div>
+
+<div class="blogPluginHelpDialog ui-helper-hidden" title="{t}Blog wall{/t}">
+   <p>
+      bla bla
+   </p>
+</div>
+
+<div class="ui-helper-clearfix"></div>
+{else}
+   {t}No data.{/t}
+{/if}
+
+<script type="text/javascript">
+
+   // destroy callback: called when the widjet is removed from the dashboard (see inettuts_codevtt.js).
+   function blogPluginJsDestroy() {
+      jQuery(".blogPluginHelpDialog").dialog('destroy').remove();
+      //jQuery(".blogPluginValuesDialog").dialog('destroy').remove();
+      jQuery(".blogPluginOptionDialog").dialog('destroy').remove();
+   }
+
+   // this function will be run at jQuery(document).ready (see dashboard.html)
+   // or when a new widget is added to the dashboard.
+   function blogPluginJsInit() {
+
+      jQuery(".blogPluginHelpDialog_link").click(function(e) {
+         e.preventDefault();
+         jQuery(".blogPluginHelpDialog").dialog("open");
+      });
+      jQuery(".blogPluginHelpDialog").dialog({
+         autoOpen: false,
+         resizable: true,
+         width: "auto",
+         hide: "fade"
+      });
+
+      jQuery(".blogPluginConfig_link").click(function(e) {
+         e.preventDefault();
+         jQuery(".blogPluginOptionDialog").dialog("open");
+      });
+      jQuery(".blogPluginOptionDialog").dialog({
+         autoOpen: false,
+         height: 'auto',
+         width: "auto",
+         //hide: "fade",
+         modal: true,
+         buttons: {
+            Ok: function() {
+               // stop form from submitting normally
+               event.preventDefault();
+
+               jQuery(this).dialog( "close" );
+
+            },
+            Cancel: function() {
+               // TODO restore previous values
+               jQuery(this).dialog( "close" );
+            }
+         }
+      });
+
+      jQuery(".blogPluginAddPost_link").click(function(e) {
+         e.preventDefault();
+         jQuery(".blogPluginAddPostDialog").dialog( { width: 900, height: 290 } );
+         jQuery(".blogPluginAddPostDialog").dialog("open");
+      });
+      jQuery(".blogPluginAddPostDialog").dialog({
+         autoOpen: false,
+         height: 'auto',
+         width: "auto",
+         //hide: "fade",
+         modal: true,
+         buttons: {
+            Ok: function() {
+               // stop form from submitting normally
+               //event.preventDefault();
+               var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
+
+               var category = jQuery(".blogPlugin_add_category").val();
+               var summary  = jQuery(".blogPlugin_add_summary").val();
+               var severity = jQuery(".blogPlugin_add_severity").val();
+               var text     = jQuery(".blogPlugin_add_content").val();
+               var expDate  = jQuery(".blogPlugin_add_expiredatepicker").val();
+               var grpDest  = jQuery(".blogPlugin_add_dest:checked").val();
+               var userDest = jQuery(".blogPlugin_add_user_dest").val();
+
+console.log(dashboardId, category, summary, severity, text, expDate, grpDest, userDest);
+               jQuery.ajax({
+                  type: 'post',
+                  url: '{$blogPlugin_ajaxPhpURL}',
+                  data: {
+                     action: 'addBlogPost',
+                     dashboardId: dashboardId,
+                     category: category,
+                     summary: summary,
+                     severity: severity,
+                     text: text,
+                     expDate: expDate,
+                     grpDest: grpDest,
+                     userDest: userDest,
+                  },
+                  dataType:"json",
+                  success: function(data) {
+                     if ('SUCCESS' === data.statusMsg) {
+                        console.log("statusMsg", data.statusMsg);
+
+                        // reload postList to display new post
+
+                     } else {
+                        console.error("statusMsg", data.statusMsg);
+                        alert(data.statusMsg);
+                     }
+                  },
+                  error: function(jqXHR, textStatus, errorThrown) {
+                     console.error(textStatus, errorThrown);
+                     alert("ERROR: Please contact your CodevTT administrator");
+                  }
+               });
+
+               jQuery(this).dialog( "close" );
+
+            },
+            Cancel: function() {
+               // TODO restore previous values
+               jQuery(this).dialog( "close" );
+            }
+         }
+      });
+   }
+</script>
+
+</div>

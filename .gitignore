@@ -23,5 +23,4 @@ templates_c
 /doc/fdj
 /doc/phpdoc/html
 
-plugins/BlogPlugin
 plugins/RsiTypeAnoLoadIndicator
