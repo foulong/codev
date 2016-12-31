@@ -12,14 +12,17 @@
       </div>
    </div>
    <div class="floatr" style="margin-top:1em; width: 16px">
-      <a class="blogPluginHelpDialog_link float" href="">
-         <img title="Help" src="images/help_icon.gif"/>
+      <a class="blogPluginRefresh_link float" href="">
+         <img title="{t}Refresh{/t}" src="images/b_refresh.png"/>
       </a>
       <a class="blogPluginAddPost_link float" href="">
          <img title="{t}Add new post{/t}" src="images/b_add.png"/>
       </a>
       <a class="blogPluginConfig_link float" href="">
          <img title="{t}Options{/t}" src="images/b_config.png"/>
+      </a>
+      <a class="blogPluginHelpDialog_link float" href="">
+         <img title="{t}Help{/t}" src="images/help_icon.gif"/>
       </a>
    </div>
 </div>
@@ -160,6 +163,9 @@
                   console.log("statusMsg", data.statusMsg);
 
                   // TODO reload postList to get my changes & other user changes
+                  // or
+                  // - remove ack button from this post
+                  // - reload activity list of this post (full list returned by data)
 
 
                } else {
@@ -238,6 +244,9 @@
       });
       jQuery(".blogPlugin_btDeletePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
+
+         // TODO: alert: This will permanently delete this post, are you sure ?!
+
          console.log("blogPlugin_btDeletePost",postId);
          jQuery.ajax({
             type: 'post',
@@ -267,6 +276,10 @@
          });
       });
 
+      jQuery(".blogPluginRefresh_link").click(function(e) {
+         e.preventDefault();
+         // TODO refresh postList
+      });
       jQuery(".blogPluginHelpDialog_link").click(function(e) {
          e.preventDefault();
          jQuery(".blogPluginHelpDialog").dialog("open");

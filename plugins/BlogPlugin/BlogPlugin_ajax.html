@@ -8,7 +8,7 @@
    </tr>
    <tr>
       <td colspan="3" rowspan="4">{$i.content}</td>
-      <td>{$i.date_submitted}</td>
+      <td>{t}Submitted{/t}: {$i.date_submitted}</td>
       <td rowspan="4" >
       {foreach from=$i.activity key=activity_id item=action}
          {$action.formatedDate}: {$action.userName} {$action.actionName}<br>
