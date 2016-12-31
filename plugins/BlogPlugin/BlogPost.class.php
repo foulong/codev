@@ -28,6 +28,16 @@ class BlogPost implements Comparable {
    const actionType_ack  = 0;
    const actionType_hide = 1;
 
+   // TODO properties
+   const activityProp_actionType   = 'actionType';
+   const activityProp_userId       = 'userId';
+   const activityProp_id           = 'id';
+   const activityProp_blogpostId   = 'blogpostId';
+   const activityProp_timestamp    = 'timestamp';
+   const activityProp_userName     = 'userName';
+   const activityProp_actionName   = 'actionName';
+   const activityProp_formatedDate = 'formatedDate';
+
    /**
     * @var Logger The logger
     */
@@ -198,7 +208,7 @@ class BlogPost implements Comparable {
    }
 
    /**
-    * Creates an activity for a user
+    * Creates/updates an activity for a user
     *
     * @param int $user_id
     * @param int $actionType
@@ -251,22 +261,55 @@ class BlogPost implements Comparable {
             $user = UserCache::getInstance()->getUser($row->user_id);
 
             $this->activityList[$row->id] = array(
-                'id' => $row->id,
-                'blogpostId' => $row->blog_id,
-                'userId' => $row->user_id,
-                'actionType' => $row->action,
-                'timestamp' => $row->date,
+                self::activityProp_id => $row->id,
+                self::activityProp_blogpostId => $row->blog_id,
+                self::activityProp_userId     => $row->user_id,
+                self::activityProp_actionType => $row->action,
+                self::activityProp_timestamp => $row->date,
                 
-                'userName' => $user->getName(),
-                'actionName' => self::getActionName($row->action),
-                'formatedDate' => date("Y-m-d G:i", $row->date), // TODO 1971-01-01
-                );
+                self::activityProp_userName => $user->getName(),
+                self::activityProp_actionName => self::getActionName($row->action),
+                self::activityProp_formatedDate => date("Y-m-d G:i", $row->date), // TODO 1971-01-01
+               );
          }
       }
-
-      // TODO set filter on activity type
-
       return $this->activityList;
+   }
+
+   public function isAcknowledged($user_id) {
+      $activities=$this->getActivityList();
+      foreach($activities as $id => $activity) {
+         if (($activity[self::activityProp_userId] == $user_id) &&
+             ($activity[self::activityProp_actionType ] == self::actionType_ack)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   public function isHidden($user_id) {
+      $activities=$this->getActivityList();
+      foreach($activities as $id => $activity) {
+         if (($activity[self::activityProp_userId] == $user_id) &&
+             ($activity[self::activityProp_actionType ] == self::actionType_hide)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   /**
+    * Hide  : owner + (others if ack), not already hidden
+    * @param type $user_id
+    */
+   public function isHideGranted($user_id) {
+      $isHidden = $this->isHidden($user_id);
+      $isAck = $this->isAcknowledged($user_id);
+
+      if ((!$isHidden) && ($user_id === $this->src_user_id) || $isAck) {
+         return true;
+      }
+      return false;
    }
 
    /**
@@ -279,6 +322,83 @@ class BlogPost implements Comparable {
    public static function compare(Comparable $postA, Comparable $postB) {
       // TODO
       return 0;
+   }
+
+
+   /**
+    * Return a smarty structure to fill BlogPlugin_ajax.html
+    * 
+    * @param int sessionUserId
+    * @return mixed[]
+    */
+   public function getSmartyStruct($sessionUserId) {
+
+      $srcUser = UserCache::getInstance()->getUser($this->src_user_id);
+
+      $item = array();
+
+      $item['id'] = $this->id;
+      $item['category'] = Config::getVariableValueFromKey(Config::id_blogCategories, $this->category);
+      $item['severity'] = BlogPost::getSeverityName($this->severity);
+      $item['summary'] = $this->summary;
+      $item['content'] = $this->content;
+      $item['date_submitted'] = date('Y-m-d G:i',$this->date_submitted);
+      $item['from']    = $srcUser->getRealname();
+
+      // find receiver
+      if (0 != $this->dest_user_id) {
+         $destUser = UserCache::getInstance()->getUser($this->dest_user_id);
+         $item['to'] = $destUser->getRealname();
+      } else if (0 != $this->dest_team_id) {
+         $team = TeamCache::getInstance()->getTeam($this->dest_team_id);
+         $item['to'] = $team->getName();
+      } else if (0 != $this->dest_project_id) {
+         // Note: unused for now
+         $destProj = ProjectCache::getInstance()->getProject($this->dest_project_id);
+         $item['to'] = $destProj->getName();
+      } else {
+         $item['to'] = '?';
+         //self::$logger->error("");
+      }
+
+      $item['activity'] = $this->getActivityList();
+
+      // ----------
+
+      /* button rules:
+       * - Delete: only if owner
+       * - Ack   : anyone but owner, not already Ack
+       * - Hide  : owner + (others if ack), not already hidden
+       * - Unhide: anyone, isHidden
+       *
+       * do not display hide buttons if option displayHiddenPosts is on ?
+       *
+       */
+
+
+
+      $isHidden = $this->isHidden($sessionUserId);
+      $isAck = $this->isAcknowledged($sessionUserId);
+      //$isDisplayHiddenPosts = true; // TODO
+
+      if ($sessionUserId === $this->src_user_id) {
+         // Delete
+         $item['buttons'] .="<img class='blogPlugin_btDeletePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";
+      } else {
+         // Ack
+         if (!$isAck) {
+            $item['buttons'] .="<img class='blogPlugin_btAckPost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_markAsRead.png' title='".T_('Mark as read')."'>";
+         }
+      }
+      // hide
+      if ((!$isHidden) && (($sessionUserId === $this->src_user_id) || $isAck)) {
+         $item['buttons'] .="<img class='blogPlugin_btHidePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_hide.png' title='".T_('Hide')."'>";
+      }
+      // unhide
+      if ($isHidden) {
+         $item['buttons'] .="<img class='blogPlugin_btUnhidePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_unhide.png' title='".T_('Show')."'>";
+      }
+      return $item;
    }
 
 }

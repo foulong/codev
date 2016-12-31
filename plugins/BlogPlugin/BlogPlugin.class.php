@@ -54,7 +54,7 @@ class BlogPlugin extends IndicatorPluginAbstract {
    }
 
    public static function getName() {
-      return T_('Blog posts'); // FR: Plan de charge
+      return T_('Blog wall');
    }
    public static function getDesc($isShortDesc = true) {
       $desc = T_('Display messages on the homepage');
@@ -124,79 +124,23 @@ class BlogPlugin extends IndicatorPluginAbstract {
       }
    }
 
-
-   /**
-    * @param BlogPost[] $postList
-    * @return mixed[]
-    */
-   private function getBlogPosts(array $postList) {
-      $blogPosts = array();
-
-      foreach ($postList as $id => $bpost) {
-         $srcUser = UserCache::getInstance()->getUser($bpost->src_user_id);
-
-         $item = array();
-
-         // TODO
-         $item['category'] = Config::getVariableValueFromKey(Config::id_blogCategories, $bpost->category);
-         $item['severity'] = BlogPost::getSeverityName($bpost->severity);
-         $item['summary'] = $bpost->summary;
-         $item['content'] = $bpost->content;
-         $item['date_submitted'] = date('Y-m-d G:i',$bpost->date_submitted);
-         $item['from']    = $srcUser->getRealname();
-
-         // find receiver
-         if (0 != $bpost->dest_user_id) {
-            $destUser = UserCache::getInstance()->getUser($bpost->dest_user_id);
-            $item['to'] = $destUser->getRealname();
-         } else if (0 != $bpost->dest_team_id) {
-            $team = TeamCache::getInstance()->getTeam($bpost->dest_team_id);
-            $item['to'] = $team->getName();
-         } else if (0 != $bpost->dest_project_id) {
-            $destProj = ProjectCache::getInstance()->getProject($bpost->dest_project_id);
-            $item['to'] = $destProj->getName();
-         } else {
-            $item['to'] = '?';
-         }
-
-         $item['activity'] = $bpost->getActivityList();
-
-         // ----------
-         $item['buttons'] .="<img class='blogPlugin_btAckPost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_markAsRead.png' title='".T_('Mark as read')."'>";
-
-         if ($this->sessionUserId === $bpost->src_user_id) {
-            // only if i'm the owner
-            $item['buttons'] .="<img class='blogPlugin_btDeletePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";
-         } else {
-            // not if i'm the owner
-            $item['buttons'] .="<img class='blogPlugin_btHidePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_hide.png' title='".T_('Hide')."'>";
-         }
-
-         // TODO only if hidden
-         $item['buttons'] .="<img class='blogPlugin_btUnhidePost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_unhide.png' title='".T_('Show')."'>";
-
-         $item['isHidden'] = '0';
-
-         $blogPosts[$id] = $item;
-      }
-      return $blogPosts;
-   }
-
-
    public function execute() {
 
       $blogManager = new BlogManager();
       $session_user = UserCache::getInstance()->getUser($this->sessionUserId);
 
-      $postList = $blogManager->getPosts($session_user->getId());
-      $blogPosts = $this->getBlogPosts($postList);
-
+      $postList   = $blogManager->getPosts($session_user->getId());
       $categories = $blogManager->getCategoryList();
-
       $severities = $blogManager->getSeverityList();
 
       $team = TeamCache::getInstance()->getTeam($this->teamid);
       $userCandidates = $team->getActiveMembers(NULL, NULL, TRUE);
+
+      $blogPosts = array();
+      foreach ($postList as $id => $bpost) {
+         $item = $bpost->getSmartyStruct($this->sessionUserId);
+         $blogPosts[$id] = $item;
+      }
 
       $this->execData = array(
           'blogPosts' => $blogPosts,

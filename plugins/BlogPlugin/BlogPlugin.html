@@ -5,7 +5,7 @@
 <div>
    <div>
       <div class="float" style="width:95%;height:350px;overflow-x:hidden;overflow-y:auto;">
-      {foreach from=$blogPlugin_blogPosts key=id item=i}
+      {foreach from=$blogPlugin_blogPosts key=id item=bpost}
          {include file="`$blogPlugin_ajaxFile`"}
             <br>
       {/foreach}
@@ -116,6 +116,11 @@
             </select>
          </td>
       </tr>
+
+
+      <tr>
+      <input class='blogPlugin_opt_displayHiddenPosts' type="checkbox" id=""></input>
+      </tr>
    </table>
 </div>
 
@@ -163,9 +168,7 @@
                   console.log("statusMsg", data.statusMsg);
 
                   // TODO reload postList to get my changes & other user changes
-                  // or
-                  // - remove ack button from this post
-                  // - reload activity list of this post (full list returned by data)
+                  console.log('bpost_htmlContent', data.bpost_htmlContent);
 
 
                } else {
@@ -261,9 +264,10 @@
                if ('SUCCESS' === data.statusMsg) {
                   console.log("statusMsg", data.statusMsg);
 
-                  // TODO reload postList to get my changes & other user changes
-
-
+                  // remove parent with class blogPlugin_blogPost
+                  var divBlogPost = jQuery(this).closest("div.blogPlugin_blogPost"); // .remove()
+                  console.log("div", divBlogPost);
+                  divBlogPost.remove();
                } else {
                   console.error("statusMsg", data.statusMsg);
                   alert(data.statusMsg);
