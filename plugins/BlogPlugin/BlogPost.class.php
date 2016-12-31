@@ -25,8 +25,8 @@ class BlogPost implements Comparable {
    const severity_normal = 2;
    const severity_high = 3;
 
-   const activity_ack  = 0;
-   const activity_hide = 1;
+   const actionType_ack  = 0;
+   const actionType_hide = 1;
 
    /**
     * @var Logger The logger
@@ -115,14 +115,14 @@ class BlogPost implements Comparable {
    /**
     * Literal name for the given activity_id
     *
-    * @param int $activity
+    * @param int $actionType
     * @return string actionName or NULL if unknown
     */
-   public static function getActivityName($activity) {
-      switch ($activity) {
-         case self::activity_ack:
+   public static function getActionName($actionType) {
+      switch ($actionType) {
+         case self::actionType_ack:
             return T_('Acknowledged');
-         case self::activity_hide:
+         case self::actionType_hide:
             return T_('Hidden');
          default:
             #return T_('unknown');
@@ -201,13 +201,13 @@ class BlogPost implements Comparable {
     * Creates an activity for a user
     *
     * @param int $user_id
-    * @param int $activity_id
+    * @param int $actionType
     * @param boolean $value  true to add, false to remove
     * @param int $date
     *
     * @throws exception if failed
     */
-   public function setActivity($user_id, $activity_id, $value, $date) {
+   public function setAction($user_id, $actionType, $value, $date) {
 
       // TODO: check if activity_id is valid ?
       
@@ -215,10 +215,10 @@ class BlogPost implements Comparable {
          // set this action.
          // TODO if already set, do nothing
          $query = "INSERT INTO `codev_blog_activity_table` (`blog_id`, `user_id`, `action`, `date`) ".
-                  "VALUES ('$this->id','$user_id','$activity_id','$date')";
+                  "VALUES ('$this->id','$user_id','$actionType','$date')";
       } else {
          // unset the action
-         $query = "DELETE FROM `codev_blog_activity_table` WHERE user_id = $user_id AND action = $activity_id";
+         $query = "DELETE FROM `codev_blog_activity_table` WHERE user_id = $user_id AND action = $actionType";
       }
 
       $result = SqlWrapper::getInstance()->sql_query($query);
@@ -237,7 +237,8 @@ class BlogPost implements Comparable {
     */
    public function getActivityList() {
       if (NULL == $this->activityList) {
-         $query = "SELECT * FROM `codev_blog_activity_table` WHERE blog_id = $this->id ORDER BY date DESC";
+         $query = "SELECT * FROM `codev_blog_activity_table` WHERE blog_id = $this->id ";
+         $query .= "ORDER BY date DESC";
          $result = SqlWrapper::getInstance()->sql_query($query);
          if (!$result) {
             echo "<span style='color:red'>ERROR: Query FAILED</span>";
@@ -246,15 +247,25 @@ class BlogPost implements Comparable {
 
          $this->activityList = array();
          while($row = SqlWrapper::getInstance()->sql_fetch_object($result)) {
+
+            $user = UserCache::getInstance()->getUser($row->user_id);
+
             $this->activityList[$row->id] = array(
                 'id' => $row->id,
                 'blogpostId' => $row->blog_id,
                 'userId' => $row->user_id,
-                'activityId' => $row->action,
-                'activityName' => $this->getActivityName($row->action),
-                'timestamp' => $row->date);
+                'actionType' => $row->action,
+                'timestamp' => $row->date,
+                
+                'userName' => $user->getName(),
+                'actionName' => self::getActionName($row->action),
+                'formatedDate' => date("Y-m-d G:i", $row->date), // TODO 1971-01-01
+                );
          }
       }
+
+      // TODO set filter on activity type
+
       return $this->activityList;
    }
 

@@ -140,24 +140,131 @@
    // or when a new widget is added to the dashboard.
    function blogPluginJsInit() {
 
+      var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
 
       jQuery(".blogPlugin_btAckPost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
          console.log("blogPlugin_btAckPost",postId);
+
+         jQuery.ajax({
+            type: 'post',
+            url: '{$blogPlugin_ajaxPhpURL}',
+            data: {
+               action: 'AckPost',
+               dashboardId: dashboardId,
+               blogpostId: postId,
+            },
+            dataType:"json",
+            success: function(data) {
+               if ('SUCCESS' === data.statusMsg) {
+                  console.log("statusMsg", data.statusMsg);
+
+                  // TODO reload postList to get my changes & other user changes
+
+
+               } else {
+                  console.error("statusMsg", data.statusMsg);
+                  alert(data.statusMsg);
+               }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+               console.error(textStatus, errorThrown);
+               alert("ERROR: Please contact your CodevTT administrator");
+            }
+         });
+
       });
       jQuery(".blogPlugin_btHidePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
          console.log("blogPlugin_btHidePost",postId);
+         jQuery.ajax({
+            type: 'post',
+            url: '{$blogPlugin_ajaxPhpURL}',
+            data: {
+               action: 'HidePost',
+               dashboardId: dashboardId,
+               blogpostId: postId,
+            },
+            dataType:"json",
+            success: function(data) {
+               if ('SUCCESS' === data.statusMsg) {
+                  console.log("statusMsg", data.statusMsg);
+
+                  // TODO reload postList to get my changes & other user changes
+
+
+               } else {
+                  console.error("statusMsg", data.statusMsg);
+                  alert(data.statusMsg);
+               }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+               console.error(textStatus, errorThrown);
+               alert("ERROR: Please contact your CodevTT administrator");
+            }
+         });
 
       });
       jQuery(".blogPlugin_btUnhidePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
          console.log("blogPlugin_btUnhidePost",postId);
+         jQuery.ajax({
+            type: 'post',
+            url: '{$blogPlugin_ajaxPhpURL}',
+            data: {
+               action: 'UnhidePost',
+               dashboardId: dashboardId,
+               blogpostId: postId,
+            },
+            dataType:"json",
+            success: function(data) {
+               if ('SUCCESS' === data.statusMsg) {
+                  console.log("statusMsg", data.statusMsg);
+
+                  // TODO reload postList to get my changes & other user changes
+
+
+               } else {
+                  console.error("statusMsg", data.statusMsg);
+                  alert(data.statusMsg);
+               }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+               console.error(textStatus, errorThrown);
+               alert("ERROR: Please contact your CodevTT administrator");
+            }
+         });
 
       });
       jQuery(".blogPlugin_btDeletePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
          console.log("blogPlugin_btDeletePost",postId);
+         jQuery.ajax({
+            type: 'post',
+            url: '{$blogPlugin_ajaxPhpURL}',
+            data: {
+               action: 'DeletePost',
+               dashboardId: dashboardId,
+               blogpostId: postId,
+            },
+            dataType:"json",
+            success: function(data) {
+               if ('SUCCESS' === data.statusMsg) {
+                  console.log("statusMsg", data.statusMsg);
+
+                  // TODO reload postList to get my changes & other user changes
+
+
+               } else {
+                  console.error("statusMsg", data.statusMsg);
+                  alert(data.statusMsg);
+               }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+               console.error(textStatus, errorThrown);
+               alert("ERROR: Please contact your CodevTT administrator");
+            }
+         });
       });
 
       jQuery(".blogPluginHelpDialog_link").click(function(e) {

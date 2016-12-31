@@ -133,7 +133,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // TODO check user rights
 
          // do the job
-         $blogpost->setActivity($sessionUserid, BlogPost::activity_ack, true, time());
+         $blogpost->setAction($sessionUserid, BlogPost::actionType_ack, true, time());
 
 
       } catch (Exception $ex) {
@@ -182,7 +182,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // TODO check user rights
 
          // do the job
-         $blogpost->setActivity($sessionUserid, BlogPost::activity_hide, true, time());
+         $blogpost->setAction($sessionUserid, BlogPost::actionType_hide, true, time());
 
       } catch (Exception $ex) {
          $statusMsg = "ERROR: ".$ex->getMessage();
@@ -206,7 +206,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // TODO check user rights
 
          // do the job
-         $blogpost->setActivity($sessionUserid, BlogPost::activity_hide, false, time());
+         $blogpost->setAction($sessionUserid, BlogPost::actionType_hide, false, time());
 
       } catch (Exception $ex) {
          $statusMsg = "ERROR: ".$ex->getMessage();

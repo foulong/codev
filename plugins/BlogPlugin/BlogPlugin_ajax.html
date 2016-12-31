@@ -9,7 +9,11 @@
    <tr>
       <td colspan="3" rowspan="4">{$i.content}</td>
       <td>{$i.date_submitted}</td>
-      <td rowspan="4" >{$i.activity}</td>
+      <td rowspan="4" >
+      {foreach from=$i.activity key=activity_id item=action}
+         {$action.formatedDate}: {$action.userName} {$action.actionName}<br>
+      {/foreach}
+      </td>
    </tr>
    <tr><td>{t}Author{/t}: {$i.from}</td></tr>
    <tr><td>{t}Dest{/t}: {$i.to}</td></tr>

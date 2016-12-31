@@ -159,7 +159,7 @@ class BlogPlugin extends IndicatorPluginAbstract {
             $item['to'] = '?';
          }
 
-         $item['activity'] = 'activities...'; // TODO
+         $item['activity'] = $bpost->getActivityList();
 
          // ----------
          $item['buttons'] .="<img class='blogPlugin_btAckPost pointer' data-bpostId='$bpost->id' align='absmiddle' src='images/b_markAsRead.png' title='".T_('Mark as read')."'>";
