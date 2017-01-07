@@ -40,6 +40,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       Tools::sendBadRequest("PluginDataProvider unserialize error");
    }
    
+   // --------------------------------------
    if ('getUserList' === $action) {
 
       echo $jsonData;
@@ -47,6 +48,19 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
 
       echo $jsonData;
 
+   // --------------------------------------
+   } else if ('updateUserSettings' === $action) {
+
+      $statusMsg = 'TODO';
+      $data = array(
+        'statusMsg' => $statusMsg,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
+   // --------------------------------------
    } else if ('addBlogPost' === $action) {
 
       $category        = Tools::getSecurePOSTIntValue('category');
@@ -98,32 +112,34 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
             Tools::sendBadRequest('Add blogpost: invalid data');
       }
 
-      $blogpostId = BlogPost::create($sessionUserid, $severity, $category, $blogpostSummary, $blogpostText, $destUserid, 0, $destTeamid, $expireTimestamp);
-      if (NULL === $blogpostId) {
-         $logger->error("BlogPost::create($sessionUserid, $severity, $category, $blogpostSummary, $blogpostText, $destUserid, 0, $destTeamid, $expireTimestamp)");
-         $statusMsg = 'ERROR: Failed to add blog post';
+      try {
+         $blogpostId = BlogPost::create($sessionUserid, $severity, $category, $blogpostSummary, $blogpostText, $destUserid, 0, $destTeamid, $expireTimestamp);
+         if (NULL === $blogpostId) {
+            $logger->error("BlogPost::create($sessionUserid, $severity, $category, $blogpostSummary, $blogpostText, $destUserid, 0, $destTeamid, $expireTimestamp)");
+            $statusMsg = 'ERROR: Failed to add blog post';
+         } else {
+            // get new html post
+            $blogpost = BlogPostCache::getInstance()->getBlogPost($blogpostId);
+            $smartyVariable = $blogpost->getSmartyStruct($sessionUserid);
+            $smartyHelper = new SmartyHelper();
+            $smartyHelper->assign('bpost', $smartyVariable);
+            $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+         }
+      } catch (Exception $ex) {
+         $statusMsg = "ERROR: ".$ex->getMessage();
       }
 
       $data = array(
         'statusMsg' => $statusMsg,
         'blogpostId' => $blogpostId,
+        'bpost_htmlContent' => $html,
       );
       
       // return data
       $jsonData = json_encode($data);
       echo $jsonData;
 
-   } else if ('updateUserSettings' === $action) {
-      
-      $statusMsg = 'TODO';
-      $data = array(
-        'statusMsg' => $statusMsg,
-      );
-
-      // return data
-      $jsonData = json_encode($data);
-      echo $jsonData;
-      
+   // --------------------------------------
    } else if ('AckPost' === $action) {
       $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
       $statusMsg = 'SUCCESS';
@@ -155,6 +171,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $jsonData = json_encode($data);
       echo $jsonData;
 
+   // --------------------------------------
    } else if ('DeletePost' === $action) {
       $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
       $statusMsg = 'SUCCESS';
@@ -179,6 +196,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $jsonData = json_encode($data);
       echo $jsonData;
 
+   // --------------------------------------
    } else if ('HidePost' === $action) {
       $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
       $statusMsg = 'SUCCESS';
@@ -203,6 +221,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $jsonData = json_encode($data);
       echo $jsonData;
 
+   // --------------------------------------
    } else if ('UnhidePost' === $action) {
       $blogpostId = Tools::getSecurePOSTIntValue('blogpostId');
       $statusMsg = 'SUCCESS';
@@ -214,6 +233,12 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // do the job
          $blogpost->setAction($sessionUserid, BlogPost::actionType_hide, false, time());
 
+         // get updated Html post
+         $smartyVariable = $blogpost->getSmartyStruct($sessionUserid);
+         $smartyHelper = new SmartyHelper();
+         $smartyHelper->assign('bpost', $smartyVariable);
+         $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+
       } catch (Exception $ex) {
          $statusMsg = "ERROR: ".$ex->getMessage();
       }
@@ -221,11 +246,16 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $data = array(
         'statusMsg' => $statusMsg,
         'blogpostId' => $blogpostId,
+        'bpost_htmlContent' => $html,
       );
 
       // return data
       $jsonData = json_encode($data);
       echo $jsonData;
+
+   // --------------------------------------
+   } else if ('refreshAllPosts' === $action) {
+      // TODO returns all posts in Html (content of div: blogPlugin_bpostsContainer)
 
    } else {
       Tools::sendNotFoundAccess();
