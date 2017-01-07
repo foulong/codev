@@ -1,6 +1,13 @@
 <div class="BlogPlugin">
 <div class="pluginInitFunction"  style="display: none;">blogPluginJsInit</div>
 <div class="pluginDestroyFunction"  style="display: none;">blogPluginJsDestroy</div>
+
+<style type="text/css" media="screen">
+   .blogPlugin_blogPost tr:hover {
+       background-color: transparent;
+   }
+</style>
+
 {if isset($blogPlugin_blogPosts)}
 <div>
    <div>
@@ -178,8 +185,6 @@
             dataType:"json",
             success: function(data) {
                if ('SUCCESS' === data.statusMsg) {
-                  console.log("statusMsg", data.statusMsg);
-
                   // reload current post
                   var divContainer = jQuery(".blogPlugin_bpostsContainer");
                   var curPost = jQuery(".blogPlugin_blogPost[data-bpostId='" + postId + "']");
@@ -212,7 +217,6 @@
 
          // TODO: alert: {t}This will permanently delete this post, are you sure ?!{/t}
 
-         console.log("blogPlugin_btDeletePost",postId);
          jQuery.ajax({
             type: 'post',
             url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
@@ -241,7 +245,6 @@
       // --------------------------------------
       jQuery(".blogPlugin_btHidePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
-         console.log("blogPlugin_btHidePost",postId);
          jQuery.ajax({
             type: 'post',
             url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
@@ -253,7 +256,6 @@
             dataType:"json",
             success: function(data) {
                if ('SUCCESS' === data.statusMsg) {
-                  console.log("statusMsg", data.statusMsg);
 
                   // TODO check data.isHidden to know if the user option "displayHiddenPosts" is activated
                   // TODO if false: delete div
@@ -289,7 +291,6 @@
       // --------------------------------------
       jQuery(".blogPlugin_btUnhidePost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
-         console.log("blogPlugin_btUnhidePost",postId);
          jQuery.ajax({
             type: 'post',
             url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
@@ -301,7 +302,6 @@
             dataType:"json",
             success: function(data) {
                if ('SUCCESS' === data.statusMsg) {
-                  console.log("statusMsg", data.statusMsg);
 
                   // reload current post
                   var divContainer = jQuery(".blogPlugin_bpostsContainer");
@@ -394,7 +394,6 @@
                var grpDest  = jQuery(".blogPlugin_add_dest:checked").val();
                var userDest = jQuery(".blogPlugin_add_user_dest").val();
 
-console.log(dashboardId, category, summary, severity, text, expDate, grpDest, userDest);
                jQuery.ajax({
                   type: 'post',
                   url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
