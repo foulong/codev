@@ -1,22 +1,21 @@
 <div class="blogPlugin_blogPost"  data-bpostId="{$bpost.id}">
-<table BORDER="1" style="width:100%">
-   <tr>
-      <td width='30'><i>{$bpost.category}</i></td>
+<table BORDER="0.5" style="width:100%; padding: 0.2em; margin-left:0.6em; margin-top:0.6em;">
+   <tr {if $bpost.isHidden}style="background-color:#F0F0F0;"{/if}>
+      <td  width='34' class="blogPlugin_bpostButtons">{$bpost.buttons}</td>
       <td title="{$bpost.id}"><b>{$bpost.summary}<b></td>
-      <td>{$bpost.buttons}</td>
-      <td>{$bpost.severity}</td>
-      <td>{$bpost.status}</td>
-   </tr>
-   <tr>
-      <td colspan="3" rowspan="4">{$bpost.content}</td>
-      <td>{t}Submitted{/t}: {$bpost.date_submitted}</td>
-      <td rowspan="4" class="blogPlugin_postActivity">
+      <td width='30'><i>{$bpost.category}</i></td>
+      <td width='120'>{$bpost.severity}</td>
+      <td  class="blogPlugin_postActivity" rowspan="5"  width='200'>
       {foreach from=$bpost.activity key=activity_id item=action}
-         {$action.formatedDate}: {$action.userName} {$action.actionName}<br>
+      <span title="{$action.formatedDate}">{$action.userName}: {$action.actionName}</span><br>
       {/foreach}
       </td>
    </tr>
-   <tr><td>{t}Author{/t}: {$bpost.from}</td></tr>
-   <tr><td>{t}Dest{/t}: {$bpost.to}</td></tr>
+   <tr {if $bpost.isHidden}style="background-color:#F0F0F0;"{/if}>
+      <td colspan="2" rowspan="4">{$bpost.content}</td>
+      <td colspan="2" title="{t}Submission date{/t}">{$bpost.date_submitted}</td>
+   </tr>
+   <tr {if $bpost.isHidden}style="background-color:#F0F0F0;"{/if}><td colspan="2" >{t}Author{/t}: {$bpost.from}</td></tr>
+   <tr {if $bpost.isHidden}style="background-color:#F0F0F0;"{/if}><td colspan="2" >{t}Dest{/t}: {$bpost.to}</td></tr>
 </table>
 </div>

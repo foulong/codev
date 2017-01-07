@@ -379,7 +379,9 @@ class BlogPost implements Comparable {
 
       $isHidden = $this->isHidden($sessionUserId);
       $isAck = $this->isAcknowledged($sessionUserId);
-      //$isDisplayHiddenPosts = true; // TODO
+      $isDisplayHiddenPosts = true; // TODO
+
+      $item['isHidden'] = ($isHidden && $isDisplayHiddenPosts) ? true : false;
 
       if ($sessionUserId === $this->src_user_id) {
          // Delete

@@ -4,7 +4,7 @@
 {if isset($blogPlugin_blogPosts)}
 <div>
    <div>
-      <div class="blogPlugin_bpostsContainer float" style="width:95%;height:350px;overflow-x:hidden;overflow-y:auto;">
+      <div class="blogPlugin_bpostsContainer float" style="background-color: #EDEDED; margin-top:1em; width:95%;height:350px;overflow-x:hidden;overflow-y:auto;">
       {foreach from=$blogPlugin_blogPosts key=id item=bpost}
          {include file="`$blogPlugin_ajaxFile`"}
             <br>
@@ -116,10 +116,15 @@
             </select>
          </td>
       </tr>
-
-
       <tr>
-      <input class='blogPlugin_opt_displayHiddenPosts' type="checkbox" id=""></input>
+         <td>{t}Hidden posts{/t}</td>
+         <td>:</td>
+         <td>
+            <select class='blogPlugin_opt_displayHiddenPosts' name='blogPlugin_opt_displayHiddenPosts'>
+               <option value='0'>{t}Hide{/t}</option>
+               <option value='1'>{t}Display{/t}</option>
+            </select>
+         </td>
       </tr>
    </table>
 </div>
@@ -177,8 +182,8 @@
                   console.log("statusMsg", data.statusMsg);
 
                   // TODO refresh post (icon changed, action changed
-                  console.log('bpost_htmlContent', data.bpost_htmlContent);
-
+                  //console.log('bpost_htmlContent', data.bpost_htmlContent);
+                  jQuery(this).remove();
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -380,7 +385,7 @@ console.log(dashboardId, category, summary, severity, text, expDate, grpDest, us
                         // add new post on the top of the list
                         console.log('bpost_htmlContent str', data.bpost_htmlContent);
                         var divContainer = jQuery(".blogPlugin_bpostsContainer");
-                        var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
+                        var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent  + '<br>' );
                         console.log('bpost_htmlContent obj', objHtmlContent);
                         divContainer.prepend(objHtmlContent);
 
