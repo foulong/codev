@@ -168,11 +168,11 @@
    function blogPluginJsInit() {
 
       var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
+      var initFunctionName = jQuery(".BlogPlugin").find('.pluginInitFunction').text();
 
       // --------------------------------------
       jQuery(".blogPlugin_btAckPost").click(function(e) {
          var postId = jQuery(this).attr("data-bpostId");
-         console.log("blogPlugin_btAckPost",postId);
 
          jQuery.ajax({
             type: 'post',
@@ -197,6 +197,8 @@
                   } else {
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
+                  // re-activate java on new inserted post
+                  window[initFunctionName]();
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -274,7 +276,10 @@
                      } else {
                          divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                      }
+                     // re-activate java on new inserted post
+                     window[initFunctionName]();
                   }
+
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -315,6 +320,8 @@
                   } else {
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
+                  // re-activate java on new inserted post
+                  window[initFunctionName]();
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -419,6 +426,9 @@
                         var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
                         console.log('bpost_htmlContent obj', objHtmlContent);
                         divContainer.prepend(objHtmlContent);
+
+                        // re-activate java on new inserted post
+                        window[initFunctionName]();
 
                      } else {
                         console.error("statusMsg", data.statusMsg);
