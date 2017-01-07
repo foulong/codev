@@ -208,6 +208,12 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // do the job
          $blogpost->setAction($sessionUserid, BlogPost::actionType_hide, true, time());
 
+         // get updated Html post
+         $smartyVariable = $blogpost->getSmartyStruct($sessionUserid);
+         $smartyHelper = new SmartyHelper();
+         $smartyHelper->assign('bpost', $smartyVariable);
+         $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+
       } catch (Exception $ex) {
          $statusMsg = "ERROR: ".$ex->getMessage();
       }
@@ -215,6 +221,8 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $data = array(
         'statusMsg' => $statusMsg,
         'blogpostId' => $blogpostId,
+        'isDisplayHiddenPosts' => false, // TODO depends on isDisplayHiddenPosts
+        'bpost_htmlContent' => $html,
       );
 
       // return data

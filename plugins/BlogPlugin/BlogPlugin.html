@@ -7,7 +7,6 @@
       <div class="blogPlugin_bpostsContainer float" style="background-color: #EDEDED; margin-top:1em; width:95%;height:350px;overflow-x:hidden;overflow-y:auto;">
       {foreach from=$blogPlugin_blogPosts key=id item=bpost}
          {include file="`$blogPlugin_ajaxFile`"}
-            <br>
       {/foreach}
       </div>
    </div>
@@ -181,9 +180,18 @@
                if ('SUCCESS' === data.statusMsg) {
                   console.log("statusMsg", data.statusMsg);
 
-                  // TODO refresh post (icon changed, action changed
-                  //console.log('bpost_htmlContent', data.bpost_htmlContent);
-                  jQuery(this).remove();
+                  // reload current post
+                  var divContainer = jQuery(".blogPlugin_bpostsContainer");
+                  var curPost = jQuery(".blogPlugin_blogPost[data-bpostId='" + postId + "']");
+                  var curPostIdx = curPost.index();
+                  var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
+
+                  curPost.remove();
+                  if (curPostIdx === 0) {
+                      divContainer.prepend(objHtmlContent);
+                  } else {
+                      divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
+                  }
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -251,6 +259,21 @@
                   // TODO if false: delete div
                   // TODO if true: refresh post (data.bpost_htmlContent) because icon changed
 
+                  // reload current post
+                  var divContainer = jQuery(".blogPlugin_bpostsContainer");
+                  var curPost = jQuery(".blogPlugin_blogPost[data-bpostId='" + postId + "']");
+                  var curPostIdx = curPost.index();
+                  var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
+
+                  curPost.remove();
+                  if (true == data.isDisplayHiddenPosts ) {
+                     if (curPostIdx === 0) {
+                         divContainer.prepend(objHtmlContent);
+                     } else {
+                         divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
+                     }
+                  }
+
                } else {
                   console.error("statusMsg", data.statusMsg);
                   alert(data.statusMsg);
@@ -280,9 +303,18 @@
                if ('SUCCESS' === data.statusMsg) {
                   console.log("statusMsg", data.statusMsg);
 
-                  // TODO reload postList to get my changes & other user changes
-                  console.log('bpost_htmlContent', data.bpost_htmlContent);
+                  // reload current post
+                  var divContainer = jQuery(".blogPlugin_bpostsContainer");
+                  var curPost = jQuery(".blogPlugin_blogPost[data-bpostId='" + postId + "']");
+                  var curPostIdx = curPost.index();
+                  var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
 
+                  curPost.remove();
+                  if (curPostIdx === 0) {
+                      divContainer.prepend(objHtmlContent);
+                  } else {
+                      divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
+                  }
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -385,7 +417,7 @@ console.log(dashboardId, category, summary, severity, text, expDate, grpDest, us
                         // add new post on the top of the list
                         console.log('bpost_htmlContent str', data.bpost_htmlContent);
                         var divContainer = jQuery(".blogPlugin_bpostsContainer");
-                        var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent  + '<br>' );
+                        var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
                         console.log('bpost_htmlContent obj', objHtmlContent);
                         divContainer.prepend(objHtmlContent);
 
