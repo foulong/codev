@@ -341,7 +341,7 @@ class BlogPost implements Comparable {
       $item['category'] = Config::getVariableValueFromKey(Config::id_blogCategories, $this->category);
       $item['severity'] = BlogPost::getSeverityName($this->severity);
       $item['summary'] = $this->summary;
-      $item['content'] = $this->content;
+      $item['content'] = nl2br($this->content);
       $item['date_submitted'] = date('Y-m-d G:i',$this->date_submitted);
       $item['from']    = $srcUser->getRealname();
 
@@ -383,6 +383,7 @@ class BlogPost implements Comparable {
 
       $item['isHidden'] = ($isHidden && $isDisplayHiddenPosts) ? true : false;
 
+      // pas tres academique, mais bon...
       if ($sessionUserId === $this->src_user_id) {
          // Delete
          $item['buttons'] .="<img class='blogPlugin_btDeletePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";

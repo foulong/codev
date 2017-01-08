@@ -51,9 +51,41 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
    // --------------------------------------
    } else if ('updateUserSettings' === $action) {
 
-      $statusMsg = 'TODO';
+      $recipient          = Tools::getSecurePOSTStringValue('recipient');
+      $category           = Tools::getSecurePOSTIntValue('category');
+      $severity           = Tools::getSecurePOSTIntValue('severity');
+      $displayHiddenPosts = Tools::getSecurePOSTIntValue('displayHiddenPosts');
+
+      // TODO check options have valid values
+
+      $userSettings = array(
+          BlogManager::OPTION_FILTER_RECIPIENT => $recipient,
+          BlogManager::OPTION_FILTER_CATEGORY => $category,
+          BlogManager::OPTION_FILTER_SEVERITY => $severity,
+          BlogManager::OPTION_FILTER_DISPLAY_HIDDEN_POSTS => $displayHiddenPosts,
+      );
+
+      // Note: settings will not be saved in dashboardSettings, we want them to be
+      //       more persistent. otherwise, removing the plugin from the dashboard looses
+      //       the settings.
+      $userSettingsJson = json_encode($userSettings);
+      Config::setValue(Config::id_blogPluginOptions, $userSettingsJson, Config::configType_string, NULL, 0, $sessionUserid, 0);
+
+      // reload all bposts with new filters applied
+      $blogManager = new BlogManager();
+      $smartyHelper = new SmartyHelper();
+      $postList   = $blogManager->getPosts($sessionUserid);
+      foreach ($postList as $id => $bpost) {
+         $smartyVariable = $bpost->getSmartyStruct($sessionUserid);
+         $smartyHelper->assign('bpost', $smartyVariable);
+         $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+         $blogPosts_htmlContent .= $html;
+      }
+
+      $statusMsg = 'SUCCESS';
       $data = array(
         'statusMsg' => $statusMsg,
+        'blogPosts_htmlContent' => $blogPosts_htmlContent,
       );
 
       // return data

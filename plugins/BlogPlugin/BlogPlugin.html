@@ -168,7 +168,6 @@
    function blogPluginJsInit() {
 
       var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
-      var initFunctionName = jQuery(".BlogPlugin").find('.pluginInitFunction').text();
 
       // --------------------------------------
       jQuery(".blogPlugin_btAckPost").click(function(e) {
@@ -198,7 +197,7 @@
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
                   // re-activate java on new inserted post
-                  window[initFunctionName]();
+                  window['blogPluginJsInit']();
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -277,7 +276,7 @@
                          divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                      }
                      // re-activate java on new inserted post
-                     window[initFunctionName]();
+                     window['blogPluginJsInit']();
                   }
 
 
@@ -321,7 +320,7 @@
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
                   // re-activate java on new inserted post
-                  window[initFunctionName]();
+                  window['blogPluginJsInit']();
 
                } else {
                   console.error("statusMsg", data.statusMsg);
@@ -364,7 +363,48 @@
          buttons: {
             Ok: function() {
                // stop form from submitting normally
-               event.preventDefault();
+               //event.preventDefault();
+
+               var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
+
+               var recipient = jQuery(".blogPlugin_opt_recipient").val();
+               var category = jQuery(".blogPlugin_opt_category").val();
+               var severity = jQuery(".blogPlugin_opt_severity").val();
+               var displayHiddenPosts = jQuery(".blogPlugin_opt_displayHiddenPosts").val();
+               jQuery.ajax({
+                  type: 'post',
+                  url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
+                  data: {
+                     action: 'updateUserSettings',
+                     dashboardId: dashboardId,
+                     recipient: recipient,
+                     category: category,
+                     severity: severity,
+                     displayHiddenPosts: displayHiddenPosts,
+                  },
+                  dataType:"json",
+                  success: function(data) {
+                     if ('SUCCESS' === data.statusMsg) {
+
+                        // refresh all posts (new filters applied)
+                        var divContainer = jQuery(".blogPlugin_bpostsContainer");
+                        divContainer.empty();
+                        var objHtmlContent = jQuery.parseHTML( data.blogPosts_htmlContent );
+                        divContainer.prepend(objHtmlContent);
+
+                        // re-activate java on new inserted post
+                        window['blogPluginJsInit']();
+
+                     } else {
+                        console.error("statusMsg", data.statusMsg);
+                        alert(data.statusMsg);
+                     }
+                  },
+                  error: function(jqXHR, textStatus, errorThrown) {
+                     console.error(textStatus, errorThrown);
+                     alert("ERROR: Please contact your CodevTT administrator");
+                  }
+               });
 
                jQuery(this).dialog( "close" );
 
@@ -428,7 +468,7 @@
                         divContainer.prepend(objHtmlContent);
 
                         // re-activate java on new inserted post
-                        window[initFunctionName]();
+                        window['blogPluginJsInit']();
 
                      } else {
                         console.error("statusMsg", data.statusMsg);

@@ -23,8 +23,6 @@
  */
 class BlogPlugin extends IndicatorPluginAbstract {
 
-   const OPTION_FILTER_DISPLAY_HIDDEN_POSTS = 'isDisplayHiddenPosts';
-
    private static $logger;
    private static $domains;
    private static $categories;
