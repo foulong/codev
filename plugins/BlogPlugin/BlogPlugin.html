@@ -258,7 +258,7 @@
             success: function(data) {
                if ('SUCCESS' === data.statusMsg) {
 
-                  // TODO check data.isHidden to know if the user option "displayHiddenPosts" is activated
+                  // TODO check data.displayHiddenPosts to know if the user option "displayHiddenPosts" is activated
                   // TODO if false: delete div
                   // TODO if true: refresh post (data.bpost_htmlContent) because icon changed
 
@@ -266,10 +266,10 @@
                   var divContainer = jQuery(".blogPlugin_bpostsContainer");
                   var curPost = jQuery(".blogPlugin_blogPost[data-bpostId='" + postId + "']");
                   var curPostIdx = curPost.index();
-                  var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
 
                   curPost.remove();
                   if (true == data.isDisplayHiddenPosts ) {
+                     var objHtmlContent = jQuery.parseHTML( data.bpost_htmlContent );
                      if (curPostIdx === 0) {
                          divContainer.prepend(objHtmlContent);
                      } else {

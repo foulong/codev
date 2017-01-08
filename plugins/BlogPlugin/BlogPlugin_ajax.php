@@ -256,11 +256,20 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
          // do the job
          $blogpost->setAction($sessionUserid, BlogPost::actionType_hide, true, time());
 
-         // get updated Html post
-         $smartyVariable = $blogpost->getSmartyStruct($sessionUserid);
-         $smartyHelper = new SmartyHelper();
-         $smartyHelper->assign('bpost', $smartyVariable);
-         $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+         $blogManager = new BlogManager();
+         $userOptions = $blogManager->getUserOptions($sessionUserid);
+         $isDisplayHiddenPosts = $userOptions[BlogManager::OPTION_FILTER_DISPLAY_HIDDEN_POSTS];
+
+         if ($isDisplayHiddenPosts) {
+            // get updated Html post
+            $smartyVariable = $blogpost->getSmartyStruct($sessionUserid);
+            $smartyHelper = new SmartyHelper();
+            $smartyHelper->assign('bpost', $smartyVariable);
+            $html = $smartyHelper->fetch(BlogPlugin::getSmartySubFilename());
+         } else {
+            // not to be displayed
+            $html = 'isDisplayHiddenPosts=false, no data will be displayed';
+         }
 
       } catch (Exception $ex) {
          $statusMsg = "ERROR: ".$ex->getMessage();
@@ -269,7 +278,7 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       $data = array(
         'statusMsg' => $statusMsg,
         'blogpostId' => $blogpostId,
-        'isDisplayHiddenPosts' => false, // TODO depends on isDisplayHiddenPosts
+        'isDisplayHiddenPosts' => $isDisplayHiddenPosts,
         'bpost_htmlContent' => $html,
       );
 
