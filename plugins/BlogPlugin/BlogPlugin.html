@@ -352,6 +352,37 @@
 
       jQuery(".blogPluginConfig_link").click(function(e) {
          e.preventDefault();
+
+         // ajaxCall to get userSettings from DB & update dialog
+         jQuery.ajax({
+            type: 'post',
+            url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
+            data: {
+               action: 'getUserSettings',
+               dashboardId: dashboardId,
+            },
+            dataType:"json",
+            success: function(data) {
+               if ('SUCCESS' === data.statusMsg) {
+
+                  // update OptionDialog comboboxes
+                  jQuery(".blogPlugin_opt_recipient").val(data.userSettings.recipient);
+                  jQuery(".blogPlugin_opt_category").val(data.userSettings.category);
+                  jQuery(".blogPlugin_opt_severity").val(data.userSettings.severity);
+                  jQuery(".blogPlugin_opt_displayHiddenPosts").val(data.userSettings.isDisplayHiddenPosts);
+
+               } else {
+                  console.error("statusMsg", data.statusMsg);
+                  //alert(data.statusMsg);
+                  // no alert, continue with preset values in comboboxes.
+               }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+               console.error(textStatus, errorThrown);
+               alert("ERROR: Please contact your CodevTT administrator");
+            }
+         });
+
          jQuery(".blogPluginOptionDialog").dialog("open");
       });
       jQuery(".blogPluginOptionDialog").dialog({
@@ -387,6 +418,7 @@
                      if ('SUCCESS' === data.statusMsg) {
 
                         // refresh all posts (new filters applied)
+                        // TODO refresh only if settings have changed
                         var divContainer = jQuery(".blogPlugin_bpostsContainer");
                         divContainer.empty();
                         var objHtmlContent = jQuery.parseHTML( data.blogPosts_htmlContent );

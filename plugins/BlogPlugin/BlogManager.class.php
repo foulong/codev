@@ -75,7 +75,7 @@ class BlogManager {
     * @param type $userId
     * @return type
     */
-   private function getUserOptions($userId, $reload = FALSE) {
+   public function getUserOptions($userId, $reload = FALSE) {
 
       //if (NULL == $this->userOptions || $reload) {
 

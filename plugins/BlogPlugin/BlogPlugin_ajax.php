@@ -49,6 +49,22 @@ if(Tools::isConnectedUser() && filter_input(INPUT_POST, 'action')) {
       echo $jsonData;
 
    // --------------------------------------
+   } else if ('getUserSettings' === $action) {
+      // send values for blogPluginOptionDialog
+      $blogManager  = new BlogManager();
+      $userSettings = $blogManager->getUserOptions($sessionUserid);
+
+      $statusMsg = 'SUCCESS';
+      $data = array(
+        'statusMsg' => $statusMsg,
+        'userSettings' => $userSettings,
+      );
+
+      // return data
+      $jsonData = json_encode($data);
+      echo $jsonData;
+
+   // --------------------------------------
    } else if ('updateUserSettings' === $action) {
 
       $recipient          = Tools::getSecurePOSTStringValue('recipient');
