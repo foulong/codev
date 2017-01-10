@@ -364,13 +364,11 @@
             dataType:"json",
             success: function(data) {
                if ('SUCCESS' === data.statusMsg) {
-
                   // update OptionDialog comboboxes
                   jQuery(".blogPlugin_opt_recipient").val(data.userSettings.recipient);
                   jQuery(".blogPlugin_opt_category").val(data.userSettings.category);
                   jQuery(".blogPlugin_opt_severity").val(data.userSettings.severity);
                   jQuery(".blogPlugin_opt_displayHiddenPosts").val(data.userSettings.isDisplayHiddenPosts);
-
                } else {
                   console.error("statusMsg", data.statusMsg);
                   //alert(data.statusMsg);
@@ -382,9 +380,10 @@
                alert("ERROR: Please contact your CodevTT administrator");
             }
          });
-
+         // always open, even if ajax error
          jQuery(".blogPluginOptionDialog").dialog("open");
       });
+
       jQuery(".blogPluginOptionDialog").dialog({
          autoOpen: false,
          height: 'auto',
@@ -437,12 +436,9 @@
                      alert("ERROR: Please contact your CodevTT administrator");
                   }
                });
-
                jQuery(this).dialog( "close" );
-
             },
             Cancel: function() {
-               // TODO restore previous values
                jQuery(this).dialog( "close" );
             }
          }
@@ -450,6 +446,9 @@
 
       jQuery(".blogPluginAddPost_link").click(function(e) {
          e.preventDefault();
+
+         // TODO empty fields !
+
          jQuery(".blogPluginAddPostDialog").dialog( { width: 900, height: 290 } );
          jQuery(".blogPluginAddPostDialog").dialog("open");
       });
