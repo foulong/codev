@@ -168,9 +168,12 @@
    function blogPluginJsInit() {
 
       var dashboardId = jQuery('.codevttDashboard').attr('data-dashboardId');
+      var divContainer = jQuery(".blogPlugin_bpostsContainer");
 
       // --------------------------------------
-      jQuery(".blogPlugin_btAckPost").click(function(e) {
+      // Note: use 'on' instead of 'click' because we need bubbeling 
+      // when new html content is added, buttons need to subscribe to existing events
+      divContainer.on("click", ".blogPlugin_btAckPost", function(e) {
          var postId = jQuery(this).attr("data-bpostId");
 
          jQuery.ajax({
@@ -196,9 +199,6 @@
                   } else {
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
-                  // re-activate java on new inserted post
-                  window['blogPluginJsInit']();
-
                } else {
                   console.error("statusMsg", data.statusMsg);
                   alert(data.statusMsg);
@@ -213,7 +213,7 @@
       });
 
       // --------------------------------------
-      jQuery(".blogPlugin_btDeletePost").click(function(e) {
+      divContainer.on("click", ".blogPlugin_btDeletePost", function(e) {
          var postId = jQuery(this).attr("data-bpostId");
 
          // TODO: alert: {t}This will permanently delete this post, are you sure ?!{/t}
@@ -243,9 +243,11 @@
          });
       });
 
+
       // --------------------------------------
-      jQuery(".blogPlugin_btHidePost").click(function(e) {
+      divContainer.on("click", ".blogPlugin_btHidePost", function(e) {
          var postId = jQuery(this).attr("data-bpostId");
+
          jQuery.ajax({
             type: 'post',
             url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
@@ -275,8 +277,6 @@
                      } else {
                          divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                      }
-                     // re-activate java on new inserted post
-                     window['blogPluginJsInit']();
                   }
 
 
@@ -293,8 +293,9 @@
 
       });
       // --------------------------------------
-      jQuery(".blogPlugin_btUnhidePost").click(function(e) {
+      divContainer.on("click", ".blogPlugin_btUnhidePost", function(e) {
          var postId = jQuery(this).attr("data-bpostId");
+
          jQuery.ajax({
             type: 'post',
             url: blogPluginSmartyData.blogPlugin_ajaxPhpURL,
@@ -319,8 +320,7 @@
                   } else {
                       divContainer.children().eq(curPostIdx - 1).after(objHtmlContent);
                   }
-                  // re-activate java on new inserted post
-                  window['blogPluginJsInit']();
+                  // re-activate java re-activate on new inserted post is done via bubbeling (blogPlugin_bpostsContainer.on event)
 
                } else {
                   console.error("statusMsg", data.statusMsg);

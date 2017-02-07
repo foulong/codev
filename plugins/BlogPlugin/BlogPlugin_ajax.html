@@ -3,8 +3,8 @@
    <tr {if $bpost.isHidden}style="background-color:#F0F0F0;"{/if}>
       <td  width='34' class="blogPlugin_bpostButtons">{$bpost.buttons}</td>
       <td title="{$bpost.id}"><b>{$bpost.summary}<b></td>
-      <td width='30'><i>{$bpost.category}</i></td>
-      <td width='120'>{$bpost.severity}</td>
+      <td width='100'><i>{$bpost.category}</i></td>
+      <td width='100'>{$bpost.severity}</td>
       <td  class="blogPlugin_postActivity" rowspan="5"  width='200'>
       {foreach from=$bpost.activity key=activity_id item=action}
       <span title="{$action.formatedDate}">{$action.userName}: {$action.actionName}</span><br>
