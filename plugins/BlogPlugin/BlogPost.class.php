@@ -379,14 +379,14 @@ class BlogPost implements Comparable {
 
       $isHidden = $this->isHidden($sessionUserId);
       $isAck = $this->isAcknowledged($sessionUserId);
-      $isDisplayHiddenPosts = true; // TODO
+      $isDisplayHiddenPosts = true;
 
       $item['isHidden'] = ($isHidden && $isDisplayHiddenPosts) ? true : false;
 
       // pas tres academique, mais bon...
       if ($sessionUserId === $this->src_user_id) {
          // Delete
-         $item['buttons'] .="<img class='blogPlugin_btDeletePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";
+         $htmlDeleteButton = "<img class='blogPlugin_btDeletePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_drop.png' title='".T_('Delete')."'>";
       } else {
          // Ack
          if (!$isAck) {
@@ -401,6 +401,8 @@ class BlogPost implements Comparable {
       if ($isHidden) {
          $item['buttons'] .="<img class='blogPlugin_btUnhidePost pointer' data-bpostId='$this->id' align='absmiddle' src='images/b_unhide.png' title='".T_('Show')."'>";
       }
+      $item['buttons'] .= $htmlDeleteButton; // delete button (if exists) always at last position
+
       return $item;
    }
 
