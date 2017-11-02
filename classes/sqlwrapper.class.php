@@ -37,24 +37,9 @@ class SqlWrapper {
    }
    
    /**
-    * @var resource a MySQL link identifier on success or false on failure.
+    * @var instance of MysqlWrapper or PgsqlWrapper, depending on config.ini
     */
-   private $link;
-
-   /**
-    * @var int Queries count for info purpose
-    */
-   private $count;
-   
-   /**
-    * @var array int[string] number[query] 
-    */
-   private $countByQuery;
-   
-   private $server;
-   private $username;
-   private $password;
-   private $database_name;
+   private $driver;
 
    /**
     * Create a SQL connection
@@ -63,22 +48,22 @@ class SqlWrapper {
     * @param string $password The password
     * @param string $database_name The name of the database that is to be selected.
     */
-   private function __construct($server, $username, $password, $database_name) {
-      $this->server = $server;
-      $this->username = $username;
-      $this->password = $password;
-      $this->database_name = $database_name;
+   private function __construct($server, $username, $password, $database_name, $db_type) {
 
-      $this->link = mysql_connect($server, $username, $password, false, MYSQL_CLIENT_COMPRESS);
-      if (FALSE === $this->link) {
-         throw new Exception("Could not connect to database: " . $this->sql_error());
-      }
-      $retCode = mysql_select_db($database_name, $this->link);
-      if (FALSE === $retCode) {
-         throw new Exception("Could not select database: " . $this->sql_error());
-      }
-      mysql_query('SET CHARACTER SET utf8');
-      mysql_query('SET NAMES utf8');
+       switch ($db_type) {
+           case 'mysql':
+               $d = 'MysqlWrapper';
+               break;
+           case 'postgresql':
+               $d = 'PgsqlWrapper';
+               break;
+           default:
+                $e = new Exception("Constructor: Unknown DB typr: ".$db_type);
+                self::$logger->error("EXCEPTION SqlWrapper constructor: ".$e->getMessage());
+                self::$logger->error("EXCEPTION stack-trace:\n".$e->getTraceAsString());
+                throw $e;               
+       }
+       $this->driver = new $d($server, $username, $password, $database_name, $db_type);
    }
 
    /**
@@ -90,10 +75,11 @@ class SqlWrapper {
     * @param string $database_name The name of the database that is to be selected.
     * @return SqlWrapper The SQLWrapper
     */
-   public static function createInstance($server, $username, $password, $database_name) {
+   public static function createInstance($server, $username, $password, $database_name, $db_type) {
       if (!isset(self::$instance)) {
-         $c = __CLASS__;
-         self::$instance = new $c($server, $username, $password, $database_name);
+         
+          $c = __CLASS__;
+         self::$instance = new $c($server, $username, $password, $database_name, $db_type);
       }
       return self::$instance;
    }
@@ -106,7 +92,8 @@ class SqlWrapper {
    public static function getInstance() {
       if (!isset(self::$instance)) {
          self::createInstance(Constants::$db_mantis_host, Constants::$db_mantis_user,
-                              Constants::$db_mantis_pass, Constants::$db_mantis_database);
+                              Constants::$db_mantis_pass, Constants::$db_mantis_database, 
+                              Constants::$db_mantis_type);
       }
       return self::$instance;
    }
@@ -120,8 +107,8 @@ class SqlWrapper {
     * @param string $database_name The name of the database that is to be selected.
     * @return SqlWrapper The SQLWrapper
     */
-   public static function sql_connect($server, $username, $password, $database_name) {
-      return self::createInstance($server, $username, $password, $database_name);
+   public static function sql_connect($server, $username, $password, $database_name, $db_type) {
+      return self::createInstance($server, $username, $password, $database_name, $db_type);
    }
 
    /**
@@ -135,7 +122,7 @@ class SqlWrapper {
          $start = microtime(true);
       }
 
-      $result = mysql_query($query, $this->link);
+      $result = $this->driver->sql_query($query);
 
       $this->count++;
          
@@ -169,7 +156,7 @@ class SqlWrapper {
     * @return string the error text from the last MySQL function, or '' (empty string) if no error occurred.
     */
    public function sql_error() {
-      return mysql_error($this->link);
+      return $this->driver->sql_error();
    }
 
    /**
@@ -179,7 +166,7 @@ class SqlWrapper {
     * @return string The contents of one cell from a MySQL result set on success, or false on failure.
     */
    function sql_result($result, $row = 0) {
-      return mysql_result($result, $row);
+      return $this->driver->sql_result($result, $row);
    }
 
    /**
@@ -188,7 +175,7 @@ class SqlWrapper {
     * @return object an object with string properties that correspond to the fetched row, or false if there are no more rows.
     */
    public function sql_fetch_object($result) {
-      return mysql_fetch_object($result);
+      return $this->driver->sql_fetch_object($result);
    }
 
    /**
@@ -197,7 +184,7 @@ class SqlWrapper {
     * @return mixed[] an array of strings that corresponds to the fetched row, or false if there are no more rows.
     */
    public function sql_fetch_array($result) {
-      return mysql_fetch_array($result);
+      return $this->driver->sql_fetch_array($result);
    }
 
    /**
@@ -206,7 +193,7 @@ class SqlWrapper {
     * @return mixed[] an associative array of strings that corresponds to the fetched row, or false if there are no more rows.
     */
    public function sql_fetch_assoc($result) {
-      return mysql_fetch_assoc($result);
+      return $this->driver->sql_fetch_assoc($result);
    }
 
    /**
@@ -227,7 +214,7 @@ class SqlWrapper {
     * @return int The ID generated for an AUTO_INCREMENT column by the previous query on success, 0 if the previous query does not generate an AUTO_INCREMENT value, or false if no MySQL connection was established.
     */
    public function sql_insert_id() {
-      return mysql_insert_id($this->link);
+      return $this->driver->sql_insert_id();
    }
 
    /**
@@ -236,7 +223,7 @@ class SqlWrapper {
     * @return int The number of rows in a result set on success or false on failure.
     */
    public function sql_num_rows($result) {
-      return mysql_num_rows($result);
+      return $this->driver->sql_num_rows($result);
    }
 
    /**
@@ -245,7 +232,7 @@ class SqlWrapper {
     * @return bool true on success or false on failure.
     */
    public function sql_free_result($result) {
-      return mysql_free_result($result);
+      return $this->driver->sql_free_result($result);
    }
 
    /**
@@ -253,7 +240,7 @@ class SqlWrapper {
     * @return bool true on success or false on failure.
     */
    public function sql_close() {
-      return mysql_close($this->link);
+      return $this->driver->sql_close();
    }
    
    /**
@@ -262,99 +249,7 @@ class SqlWrapper {
     * @return bool True if successfull
     */
    public function sql_dump($filename) {
-      $codevReportsDir = Constants::$codevOutputDir.DIRECTORY_SEPARATOR.'reports';
-      $filepath = $codevReportsDir.DIRECTORY_SEPARATOR.$filename;
-         
-      $command = "mysqldump --host=$this->server --user=$this->username --password=$this->password  $this->database_name > $filepath";
-
-      $retCode = -1;
-      #$status = system($command, $retCode);
-      exec($command, $output, $retCode);
-      
-      if (0 != $retCode) {
-         if(self::$logger->isDebugEnabled()) {
-            self::$logger->debug("Dump with mysqldump failed, so we use the PHP method");
-         }
-         
-         //get all of the tables
-         $tables = array();
-         $result = $this->sql_query('SHOW TABLES');
-         while($row = mysql_fetch_row($result)) {
-            $tables[] = $row[0];
-         }
-
-         //cycle through
-         $return = "-- MySQL dump\n";
-         $return .= "--\n";
-         $return .= "-- Host: ".$this->server."    Database: ".$this->database_name."\n";
-         $return .= "-- ------------------------------------------------------\n";
-         $return .= "-- Server version	\n\n";
-         foreach($tables as $table) {
-            $result = $this->sql_query('SELECT * FROM '.$table);
-            $num_fields = mysql_num_fields($result);
-
-            $return .= "--\n";
-            $return .= "-- Table structure for table `".$table."`\n";
-            $return .= "--\n\n";
-            $return .= 'DROP TABLE IF EXISTS '.$table.';';
-            $row2 = mysql_fetch_row($this->sql_query('SHOW CREATE TABLE '.$table));
-            $return .= "\n".$row2[1].";\n\n";
-            if(self::sql_num_rows($result) > 0) {
-               $return .= "--\n";
-               $return .= "-- Dumping data for table `".$table."`\n";
-               $return .= "--\n\n";
-               $return .= "LOCK TABLES `".$table."` WRITE;\n";
-               $return .= "/*!40000 ALTER TABLE `".$table."` DISABLE KEYS */\n";
-               while($row = mysql_fetch_row($result)) {
-                  $return.= 'INSERT INTO '.$table.' VALUES(';
-                  for($j=0; $j<$num_fields; $j++) {
-                     $row[$j] = addslashes($row[$j]);
-                     $row[$j] = ereg_replace("\n","\\n",$row[$j]);
-                     if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } else { $return.= '""'; }
-                     if ($j<($num_fields-1)) { $return.= ','; }
-                  }
-                  $return .= ");\n";
-               }
-               $return .= "/*!40000 ALTER TABLE `".$table."` ENABLE KEYS */\n";
-               $return .= "UNLOCK TABLES `".$table."` WRITE;\n";
-               $return .= "\n";
-            }
-         }
-
-         //save file
-         $folderExists = file_exists($codevReportsDir);
-         if(!$folderExists) {
-            self::$logger->info("The folder ".$codevReportsDir." doesn't exist, so we try to create it");
-            $folderExists = mkdir($codevReportsDir);
-            if($result) {
-               self::$logger->info("Successfull creation : ".$codevReportsDir);
-            } else {
-               self::$logger->warn("Failed to create : ".$codevReportsDir);
-            }
-         }
-         
-         $result = FALSE;
-         if($folderExists) {
-            $return .= file_get_contents(BASE_PATH.DIRECTORY_SEPARATOR."install".DIRECTORY_SEPARATOR."codevtt_procedures.sql")."\n";
-            $gzdata = gzencode($return, 9);
-            $fp = fopen($filepath.".gz", 'wb+');
-            if($fp) {
-               fwrite($fp, $gzdata);
-               $result = fclose($fp);
-            }
-         }
-         
-         if($result) {
-            self::$logger->info("Database dump successfully done in ".$filepath.".gz");
-         } else {
-            self::$logger->error("Failed to dump the database");
-         }
-         
-         return $result;
-      } else {
-         self::$logger->info("Database dump successfully done in ".$filepath);
-         return TRUE;
-      }
+      return $this->driver->sql_dump($filename);
    }
 
    /**
@@ -367,18 +262,6 @@ class SqlWrapper {
    
    public function getCountByQuery() {
       return $this->countByQuery;
-   }
-
-   public function mysql_num_rows($result) {
-      return mysql_num_rows($result);
-   }
-
-   /**
-    * Get the connection link
-    * @return resource a MySQL link identifier on success or false on failure.
-    */
-   public function getLink() {
-      return $this->link;
    }
 
    public function logStats() {
@@ -395,7 +278,6 @@ class SqlWrapper {
                }
             }
          }
-
          self::$logger->info('TOTAL SQL queries: ' . $queriesCount . ' to display Page '.$_SERVER['PHP_SELF']);
       }
    }
@@ -404,4 +286,3 @@ class SqlWrapper {
 
 SqlWrapper::staticInit();
 
-?>
