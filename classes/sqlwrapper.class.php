@@ -63,7 +63,7 @@ class SqlWrapper {
                 self::$logger->error("EXCEPTION stack-trace:\n".$e->getTraceAsString());
                 throw $e;               
        }
-       $this->driver = new $d($server, $username, $password, $database_name, $db_type);
+       $this->driver = new $d($server, $username, $password, $database_name);
    }
 
    /**

@@ -116,13 +116,6 @@ class SqlWrapperInterface {
     */
    public function sql_dump($filename);
 
-   /**
-    * Get the queries count
-    * @return int Number of queries
-    */
-   public function getQueriesCount();
-   
-   public function getCountByQuery();
 
 
 }

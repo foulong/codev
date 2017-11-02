@@ -283,18 +283,6 @@ class MysqlWrapper implements SqlWrapperInterface{
    }
 
    /**
-    * Get the queries count
-    * @return int Number of queries
-    */
-   public function getQueriesCount() {
-      return $this->count;
-   }
-   
-   public function getCountByQuery() {
-      return $this->countByQuery;
-   }
-
-   /**
     * Get the connection link
     * @return resource a MySQL link identifier on success or false on failure.
     */
