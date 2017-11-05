@@ -16,21 +16,10 @@
    along with CodevTT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class SqlWrapperInterface {
-
-   /**
-    * Open a connection to a MySQL Server
-    * @static
-    * @param string $server The MySQL server
-    * @param string $username The username
-    * @param string $password The password
-    * @param string $database_name The name of the database that is to be selected.
-    * @return SqlWrapper The SQLWrapper
-    */
-   public function sql_connect($server, $username, $password, $database_name);
-
-   /**
-    * Send a MySQL query
+interface SqlWrapperInterface {
+   
+    /**
+    * Send a SQL query
     * @param string $query  An SQL query
     * @return resource For SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returns a resource on success, or false on error.
     * For other type of SQL statements, INSERT, UPDATE, DELETE, DROP, etc, returns true on success or false on error.

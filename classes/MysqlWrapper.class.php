@@ -16,7 +16,8 @@
    along with CoDev-Timetracking.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class MysqlWrapper implements SqlWrapperInterface{
+class MysqlWrapper implements SqlWrapperInterface 
+{
 
    /**
     * @var Logger The logger
@@ -52,15 +53,14 @@ class MysqlWrapper implements SqlWrapperInterface{
    private $database_name;
 
    /**
-    * Open a connection to a MySQL Server
-    * @static
+    * Constructor
     * @param string $server The MySQL server
     * @param string $username The username
     * @param string $password The password
     * @param string $database_name The name of the database that is to be selected.
-    * @return SqlWrapper The SQLWrapper
+    * @return MySqlWrapper
     */
-   public function sql_connect($server, $username, $password, $database_name) {
+   public function __construct($server, $username, $password, $database_name) {
       $this->server = $server;
       $this->username = $username;
       $this->password = $password;

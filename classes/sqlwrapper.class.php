@@ -77,7 +77,6 @@ class SqlWrapper {
     */
    public static function createInstance($server, $username, $password, $database_name, $db_type) {
       if (!isset(self::$instance)) {
-         
           $c = __CLASS__;
          self::$instance = new $c($server, $username, $password, $database_name, $db_type);
       }
