@@ -27,6 +27,16 @@ class SqlWrapper {
     * @var SqlWrapper class instances
     */
    private static $instance;
+   
+    /**
+    * @var int Queries count for info purpose
+    */
+   private $count;
+   
+   /**
+    * @var array int[string] number[query] 
+    */
+   private $countByQuery;
 
    /**
     * Initialize complex static variables

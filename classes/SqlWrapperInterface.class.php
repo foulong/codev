@@ -27,8 +27,8 @@ interface SqlWrapperInterface {
    public function sql_query($query);
 
    /**
-    * Returns the text of the error message from previous MySQL operation
-    * @return string the error text from the last MySQL function, or '' (empty string) if no error occurred.
+    * Returns the text of the error message from previous SQL operation
+    * @return string the error text from the last SQL function, or '' (empty string) if no error occurred.
     */
    public function sql_error();
 
@@ -93,7 +93,7 @@ interface SqlWrapperInterface {
    public function sql_free_result($result);
 
    /**
-    * Close MySQL connection
+    * Close SQL connection
     * @return bool true on success or false on failure.
     */
    public function sql_close();

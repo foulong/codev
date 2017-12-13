@@ -36,16 +36,6 @@ class MysqlWrapper implements SqlWrapperInterface
     * @var resource a MySQL link identifier on success or false on failure.
     */
    private $link;
-
-   /**
-    * @var int Queries count for info purpose
-    */
-   private $count;
-   
-   /**
-    * @var array int[string] number[query] 
-    */
-   private $countByQuery;
    
    private $server;
    private $username;
